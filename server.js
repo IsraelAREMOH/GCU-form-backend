@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import compression from "compression";
 import {
   contactValidationRules,
   validateContact,
@@ -11,9 +14,26 @@ dotenv.config();
 
 const app = express();
 
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
+
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ["POST"],
+  }),
+);
 app.use(express.json());
+app.use(helmet());
+app.use(compression());
+
+// Rate limiting for contact form
+const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: "Too many requests, please send us an Email",
+});
 
 // Zoho SMTP transporter
 const transporter = nodemailer.createTransport({
@@ -24,6 +44,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.ZOHO_EMAIL,
     pass: process.env.ZOHO_APP_PASSWORD,
   },
+  connectionTimeout: 30000,
 });
 
 // Health check
@@ -34,6 +55,7 @@ app.get("/", (req, res) => {
 // Contact form endpoint
 app.post(
   "/api/contact",
+  contactLimiter,
   contactValidationRules,
   validateContact,
   async (req, res) => {
@@ -51,7 +73,8 @@ app.post(
           <p><strong>Email:</strong> ${email}</p>
           <p><strong>Phone:</strong> ${phone}</p>
           <p><strong>Business:</strong> ${business}</p>
-          <p><strong>Services:</strong> ${services.join(", ")}</p>
+          <p><strong>Services:</strong> ${Array.isArray(services) ? services.join(", ") : services}
+</p>
           <p><strong>Message:</strong></p>
           <p>${message}</p>
         `,
