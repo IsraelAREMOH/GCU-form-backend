@@ -18,23 +18,8 @@ app.set("trust proxy", 1);
 app.disable("x-powered-by");
 
 // Middleware
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "http://localhost:5173",
-].filter(Boolean);
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS policy blocked this origin"), false);
-      }
-    },
-    methods: ["GET", "POST"],
-  }),
-);
+app.use(cors());
 
 app.use(express.json());
 app.use(helmet());
