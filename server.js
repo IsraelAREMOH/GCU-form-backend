@@ -19,7 +19,12 @@ app.disable("x-powered-by");
 
 // Middleware
 
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(helmet());
