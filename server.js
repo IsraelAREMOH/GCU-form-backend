@@ -20,10 +20,11 @@ app.disable("x-powered-by");
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
-    methods: ["POST"],
+    origin: process.env.FRONTEND_URL || "*",
+    methods: ["GET", "POST"],
   }),
 );
+
 app.use(express.json());
 app.use(helmet());
 app.use(compression());
