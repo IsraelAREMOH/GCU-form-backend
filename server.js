@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+
 import compression from "compression";
 import {
   contactValidationRules,
@@ -31,11 +31,6 @@ app.use(helmet());
 app.use(compression());
 
 // Rate limiting for contact form
-const contactLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: "Too many requests, please send us an Email",
-});
 
 // Zoho SMTP transporter
 const transporter = nodemailer.createTransport({
@@ -57,7 +52,7 @@ app.get("/", (req, res) => {
 // Contact form endpoint
 app.post(
   "/api/contact",
-  contactLimiter,
+
   contactValidationRules,
   validateContact,
   async (req, res) => {
