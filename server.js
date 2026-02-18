@@ -22,9 +22,11 @@ app.disable("x-powered-by");
 app.use(
   cors({
     origin: true,
-    credentials: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
   }),
 );
+app.options("*", cors());
 
 app.use(express.json());
 app.use(helmet());
