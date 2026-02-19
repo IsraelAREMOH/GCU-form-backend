@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import nodemailer from "nodemailer";
+//import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import helmet from "helmet";
 
 import compression from "compression";
@@ -30,10 +31,13 @@ app.use(
 app.use(express.json());
 app.use(helmet());
 app.use(compression());
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Rate limiting for contact form
 
 // Zoho SMTP transporter
+{
+  /** 
 const transporter = nodemailer.createTransport({
   host: "smtp.zoho.com",
   port: 587,
@@ -44,6 +48,8 @@ const transporter = nodemailer.createTransport({
   },
   connectionTimeout: 30000,
 });
+*/
+}
 
 // Health check
 app.get("/", (req, res) => {
@@ -53,15 +59,14 @@ app.get("/", (req, res) => {
 // Contact form endpoint
 app.post(
   "/api/contact",
-
   contactValidationRules,
   validateContact,
   async (req, res) => {
     const { name, email, phone, business, services, message } = req.body;
 
     try {
-      await transporter.sendMail({
-        from: `"Website Form" <${process.env.ZOHO_EMAIL}>`,
+      await resend.emails.send({
+        from: "onboarding@resend.dev",
         to: process.env.ZOHO_EMAIL,
         replyTo: email,
         subject: "New Website Form Submission",
